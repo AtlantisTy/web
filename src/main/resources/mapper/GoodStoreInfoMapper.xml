@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ty.web.mapper.GoodStoreInfoMapper">
+  <resultMap id="BaseResultMap" type="com.ty.web.entity.GoodStoreInfo">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="sku_id" jdbcType="INTEGER" property="skuId" />
+    <result column="store_id" jdbcType="INTEGER" property="storeId" />
+    <result column="pv" jdbcType="INTEGER" property="pv" />
+    <result column="period" jdbcType="INTEGER" property="period" />
+    <result column="dt" jdbcType="DATE" property="dt" />
+    <result column="add_cart" jdbcType="INTEGER" property="addCart" />
+    <result column="payment" jdbcType="INTEGER" property="payment" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="created" jdbcType="TIMESTAMP" property="created" />
+    <result column="operator" jdbcType="VARCHAR" property="operator" />
+    <result column="modified" jdbcType="TIMESTAMP" property="modified" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    `id`, `sku_id`, `store_id`, `pv`, `period`, `dt`, `add_cart`, `payment`, `creator`,
+    `created`, `operator`, `modified`
+  </sql>
+
+  <select id="queryPotentialStoresUnBrowseCount" resultType="java.lang.Long">
+    select count(0) from good_store_info gsi
+    where sku_id = #{skuId}
+    and period = #{period}
+    and pv <![CDATA[<=]]> 0
+  </select>
+
+  <select id="queryPotentialStoresBrowseUnAddcartCount" resultType="java.lang.Long">
+    select count(0) from good_store_info gsi
+    where sku_id = #{skuId}
+    and period = #{period}
+    and pv <![CDATA[>]]> 0
+    and add_cart <![CDATA[<=]]> 0
+  </select>
+
+  <select id="queryPotentialStoresAddcartUnPaymentCount" resultType="java.lang.Long">
+    select count(0) from good_store_info gsi
+    where sku_id = #{skuId}
+    and period = #{period}
+    and add_cart <![CDATA[>]]> 0
+    and payment <![CDATA[<=]]> 0
+  </select>
+
+  <select id="queryPotentialStoresPaymentCount" resultType="java.lang.Long">
+    select count(0) from good_store_info gsi
+    where sku_id = #{skuId}
+    and period = #{period}
+    and payment <![CDATA[>]]> 0
+  </select>
+
+  <select id="queryPotentialStoresUnBrowse" resultType="java.lang.Integer">
+    select store_id from good_store_info gsi
+    where sku_id = #{skuId}
+    and period = #{period}
+    and pv <![CDATA[<=]]> 0
+  </select>
+
+  <select id="queryPotentialStoresBrowseUnAddcart" resultType="java.lang.Integer">
+    select store_id from good_store_info gsi
+    where sku_id = #{skuId}
+    and period = #{period}
+    and pv <![CDATA[>]]> 0
+    and add_cart <![CDATA[<=]]> 0
+  </select>
+
+  <select id="queryPotentialStoresAddcartUnPayment" resultType="java.lang.Integer">
+    select store_id from good_store_info gsi
+    where sku_id = #{skuId}
+    and period = #{period}
+    and add_cart <![CDATA[>]]> 0
+    and payment <![CDATA[<=]]> 0
+  </select>
+
+  <select id="queryPotentialStoresPayment" resultType="java.lang.Integer">
+    select store_id from good_store_info gsi
+    where sku_id = #{skuId}
+    and period = #{period}
+    and payment <![CDATA[>]]> 0
+  </select>
+
+  <select id="potentialStoresCountBySkuId" resultType="com.ty.web.bo.PotentialStoresIdBO">
+    select sku_id as skuId,count(sku_id) as storeCount from good_store_info gsi
+    where sku_id in
+    <foreach collection="queryPotentialStores.skuIds" item="item" open="(" close=")" separator=",">
+      #{item}
+    </foreach>
+    and pv <![CDATA[>]]> 0
+    and add_cart <![CDATA[<=]]> 0
+    group by sku_id
+    union all
+    select sku_id as skuId,count(sku_id) as storeCount from good_store_info gsi
+    where sku_id in
+    <foreach collection="queryPotentialStores.skuIds" item="item" open="(" close=")" separator=",">
+      #{item}
+    </foreach>
+    and add_cart <![CDATA[>]]> 0
+    and payment <![CDATA[<=]]> 0
+    group by sku_id
+  </select>
+
+</mapper>
